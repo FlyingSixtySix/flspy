@@ -154,6 +154,11 @@ def main():
     t0 = time.time()
     opened = 0
 
+    # Create the output directory if it doesn't exist.
+    if args.verbose:
+        print(f'Creating output directory \'{args.output}\' if it doesn\'t exist...')
+    os.makedirs(args.output, exist_ok=True)
+
     # Map all the domains' output/*.txt files to None. File handles will be initialized on first use.
     domain_handles = {}
     for domain in domains:
