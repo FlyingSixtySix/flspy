@@ -22,7 +22,7 @@ optional arguments:
   --unescape-slashes, -u
                         replace slash escapes with slashes
   --collapse-subdomains, -s
-                        collapse subdomains into their top-level domain
+                        collapse subdomains into their root domain
   --verbose, -v         verbose output (hurts performance)
   --quiet, -q           no output
 ```
