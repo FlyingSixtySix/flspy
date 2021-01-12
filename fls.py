@@ -21,6 +21,8 @@ argparser.add_argument('--domains', '-d', help='domain list file path', default=
 argparser.add_argument('--chunks', '-c', help='chunk size in bytes', default=4096)
 argparser.add_argument('--unescape-slashes', '-u', help='replace slash escapes with slashes', action='store_true',
                        default=True)
+argparser.add_argument('--collapse-subdomains', '-s', help='collapse subdomains into their root domain',
+                       action='store_true', default=False)
 argparser.add_argument('--verbose', '-v', help='verbose output (hurts performance)', action='count', default=0)
 argparser.add_argument('--quiet', '-q', help='no output', action='store_true', default=False)
 args = argparser.parse_args()
@@ -127,10 +129,15 @@ def process_file(input_path, domain_handles):
                 if args.unescape_slashes:
                     match = match.replace('\\/', '/')
                 parsed_url = urlparse(match)
-                trimmed_netloc = parsed_url.netloc.lstrip('www.')
+                domain_name = parsed_url.netloc.lstrip('www.')
 
-                if trimmed_netloc in domains:
-                    domains[trimmed_netloc].append(match)
+                if args.collapse_subdomains:
+                    import tldextract
+                    extracted = tldextract.extract(match)
+                    domain_name = extracted.domain + '.' + extracted.suffix
+
+                if domain_name in domains:
+                    domains[domain_name].append(match)
                 else:
                     domains['unknown'].append(match)
 

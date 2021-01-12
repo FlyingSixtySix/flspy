@@ -1,7 +1,7 @@
 # flspy
 
 ```
-usage: fls.py [-h] [--encoding ENCODING] [--filter FILTER] [--filter-type {whitelist,blacklist}] [--domains DOMAINS] [--chunks CHUNKS] [--verbose] [--quiet] [input] [output]
+usage: fls.py [-h] [--encoding ENCODING] [--filter FILTER] [--filter-type {whitelist,blacklist}] [--domains DOMAINS] [--chunks CHUNKS] [--unescape-slashes] [--collapse-subdomains] [--verbose] [--quiet] [input] [output]
 
 Sorts all URLs found in the given input files into the relevant domain group files.
 
@@ -19,15 +19,32 @@ optional arguments:
                         domain list file path
   --chunks CHUNKS, -c CHUNKS
                         chunk size in bytes
+  --unescape-slashes, -u
+                        replace slash escapes with slashes
+  --collapse-subdomains, -s
+                        collapse subdomains into their top-level domain
   --verbose, -v         verbose output (hurts performance)
   --quiet, -q           no output
-
 ```
 
 ## Running
 
 1. Configure `domains.txt` (default) or `domains.json` with the domains to group by
 2. `python3 fls.py [OPTIONS]` (see above)
+
+**NOTE:** Use of the `--collapse-subdomains, -s` option requires [`tldextract`](https://pypi.org/project/tldextract/3.1.0/).
+If you won't be using it, you can skip over this bit.
+The easiest way to get the package is to create a virtual environment and install the dependencies based on the provided `requirements.txt`:
+```bash
+python3 -m venv venv
+
+# If on Windows
+source venv/Scripts/activate
+# If on Linux/macOS
+source venv/bin/activate
+
+pip install -r requirements.txt
+```
 
 ## Migrating from [file-link-sorter](https://github.com/FlyingSixtySix/file-link-sorter)
 
