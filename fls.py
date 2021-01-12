@@ -19,7 +19,9 @@ argparser.add_argument('--filter-type', help='whether to use the filter as a whi
                        choices=['whitelist', 'blacklist'], default='blacklist')
 argparser.add_argument('--domains', '-d', help='domain list file path', default='domains.txt')
 argparser.add_argument('--chunks', '-c', help='chunk size in bytes', default=4096)
-argparser.add_argument('--verbose', '-v', help='verbose output (hurts performance)', action='store_true', default=False)
+argparser.add_argument('--unescape-slashes', '-u', help='replace slash escapes with slashes', action='store_true',
+                       default=True)
+argparser.add_argument('--verbose', '-v', help='verbose output (hurts performance)', action='count', default=0)
 argparser.add_argument('--quiet', '-q', help='no output', action='store_true', default=False)
 args = argparser.parse_args()
 
@@ -54,7 +56,7 @@ def walk_paths(path):
     return output
 
 
-url_regex = re.compile(r'(?:https?://|www\.)[\w\d.]+(?::[d]{1,5})?(?:/[\w\d=#&\-?.:/!]+)+')
+url_regex = re.compile(r'(?:https?:\\?/\\?/|www\.)[\w\d.]+(?::[\d]{1,5})?(?:\\?/[\w\d=#&\-?.:/!%@_~]+)+')
 domains = {domain_name: [] for domain_name in get_domain_list()}
 domains['unknown'] = []
 
@@ -122,6 +124,8 @@ def process_file(input_path, domain_handles):
                 last_chunk_with_last_match = chunk[spans[-1][0]:]
 
             for match in matches:
+                if args.unescape_slashes:
+                    match = match.replace('\\/', '/')
                 parsed_url = urlparse(match)
                 trimmed_netloc = parsed_url.netloc.lstrip('www.')
 
@@ -135,12 +139,15 @@ def process_file(input_path, domain_handles):
     #   'example.com': ['https://example.com/?params=work&too!foo#bar.baz']
     # }
     for domain_group, grouped_domains in domains.items():
+        if args.verbose > 0:
+            if len(grouped_domains) > 0:
+                print(f'{domain_group}: {len(grouped_domains)} domains')
         for domain in grouped_domains:
             # If a file handle hasn't been opened for the domain, open and assign it.
             if domain_handles[domain_group] is None:
                 # This should be reworked in the event more output types are added.
                 handle_path = os.path.join(args.output, domain_group + '.txt')
-                if args.verbose:
+                if args.verbose > 0:
                     print(f'Opening file handle for output {handle_path}...')
                 domain_handles[domain_group] = open(handle_path, 'a+', encoding=encoding)
             domain_handles[domain_group].write(domain + '\n')
@@ -155,7 +162,7 @@ def main():
     opened = 0
 
     # Create the output directory if it doesn't exist.
-    if args.verbose:
+    if args.verbose > 0:
         print(f'Creating output directory \'{args.output}\' if it doesn\'t exist...')
     os.makedirs(args.output, exist_ok=True)
 
@@ -170,7 +177,7 @@ def main():
     # Process every file found in the input directory.
     for input_path in input_paths:
         opened += 1
-        if args.verbose:
+        if args.verbose > 0:
             print(f'{opened}/{len(input_paths)}:', input_path)
         process_file(input_path, domain_handles)
 
