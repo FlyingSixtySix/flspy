@@ -52,13 +52,21 @@ def walk_paths(path):
     output = []
     for root, dirs, files in os.walk(path):
         for file in files:
-            if args.filter_type == 'blacklist' and os.path.splitext(file)[1] not in extension_filter \
-                    or args.filter_type == 'whitelist' and os.path.splitext(file)[1] in extension_filter:
+            splitext = os.path.splitext(file)
+            accept = False
+            # Basic blacklist/whitelist based on extension filter
+            if args.filter_type == 'blacklist':
+                accept = accept or splitext[1] not in extension_filter
+                accept = accept or splitext[1] != '' and args.filter == '.'
+            elif args.filter_type == 'whitelist':
+                accept = accept or splitext[1] in extension_filter
+                accept = accept or splitext[1] == '' and args.filter == '.'
+            if accept:
                 output.append(os.path.join(root, file))
     return output
 
 
-url_regex = re.compile(r'(?:https?:\\?/\\?/|www\.)[\w\d.]+(?::[\d]{1,5})?(?:\\?/[\w\d=#&\-?.:/!%@_~]+)+')
+url_regex = re.compile(r'(?:https?:\\?/\\?/|www\.)[\w\d.]+(?::[\d]{1,5})?(?:\\?/[\w\d=#&\-?.:/!%@_~]*)+')
 domains = {domain_name: [] for domain_name in get_domain_list()}
 domains['unknown'] = []
 

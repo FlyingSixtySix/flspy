@@ -32,6 +32,9 @@ optional arguments:
 1. Configure `domains.txt` (default) or `domains.json` with the domains to group by
 2. `python3 fls.py [OPTIONS]` (see above)
 
+**NOTE:** Use a filter of `.` to signify files without extensions.
+For example: `--filter . --filter-type whitelist` will allow only files without extensions.
+
 **NOTE:** Use of the `--collapse-subdomains, -s` option requires [`tldextract`](https://pypi.org/project/tldextract/3.1.0/).
 If you won't be using it, you can skip over this bit.
 The easiest way to get the package is to create a virtual environment and install the dependencies based on the provided `requirements.txt`:
