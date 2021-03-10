@@ -53,14 +53,17 @@ def walk_paths(path):
     for root, dirs, files in os.walk(path):
         for file in files:
             splitext = os.path.splitext(file)
+            no_extension = splitext[1] == ''
             accept = False
             # Basic blacklist/whitelist based on extension filter
             if args.filter_type == 'blacklist':
                 accept = accept or splitext[1] not in extension_filter
                 accept = accept or splitext[1] != '' and args.filter == '.'
+                accept = accept or no_extension and args.filter == ''
             elif args.filter_type == 'whitelist':
                 accept = accept or splitext[1] in extension_filter
                 accept = accept or splitext[1] == '' and args.filter == '.'
+                accept = accept or no_extension and args.filter == ','
             if accept:
                 output.append(os.path.join(root, file))
     return output
